@@ -24,6 +24,7 @@ var outputName string
 var applyFunctionName string
 var applyOptionFunctionType string
 var createNewFunc bool
+var createDefaultFunc bool
 var runGoFmt bool
 var optionPrefix string
 var optionSuffix string
@@ -42,6 +43,7 @@ var Usage = func() {
 func initFlags() {
 	flag.StringVar(&typeName, "type", "", "name of struct to create options for")
 	flag.BoolVar(&createNewFunc, "new", true, "whether to create a function to return a new config")
+	flag.BoolVar(&createDefaultFunc, "default", false, "whether to create a function to return a default config")
 	flag.StringVar(&optionInterfaceName, "option", "Option", "name of the interface to use for options")
 	flag.StringVar(&imports, "imports", "", "a comma-separated list of packages with optional alias (e.g. time,url=net/url) ")
 	flag.StringVar(&outputName, "output", "", "name of output file (default is <type>_options.go)")
@@ -283,6 +285,7 @@ func writeOptionsFile(types []string, packageName string, node ast.Node, fset *t
 			"applyFuncName":       applyFunctionName,
 			"applyOptionFuncName": applyOptionFunctionType,
 			"createNewFunc":       createNewFunc,
+			"createDefaultFunc":   createDefaultFunc,
 			"implementEqual":      implementEqual,
 			"implementString":     implementString,
 		})

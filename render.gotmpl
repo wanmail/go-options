@@ -25,22 +25,34 @@ func (f {{ $applyOptionFuncType }}) apply(c *{{ $.configTypeName }}) error {
 }
 
 {{ $applyFuncName := or $.applyFuncName (printf "apply%sOptions" (ToPublic $.configTypeName)) }}
+{{ $defaultFuncName := or $.defaultFuncName (printf "default%sOptions" (ToPublic $.configTypeName)) }}
 
 {{ if $.createNewFunc}}
 func new{{ $.configTypeName | ToPublic}}(options ...{{ $.optionTypeName }}) ({{ $.configTypeName }}, error) {
-    var c {{ $.configTypeName }}
-    err := {{ $applyFuncName }}(&c, options...)
-    return c, err
+    c := {{ $defaultFuncName }}()
+    err := {{ $applyFuncName }}(c, options...)
+    return *c, err
 }
 {{ end }}
 
-func {{ $applyFuncName }}(c *{{ $.configTypeName }}, options ...{{ $.optionTypeName }}) error {
+func {{ $defaultFuncName }}() *{{ $.configTypeName }} {
+    c := new({{ $.configTypeName }})
 {{- range .options -}}{{ $optionName := .Name }}{{ if .DefaultValue }}
     c.{{ .Name }} = {{ .DefaultValue }}
 {{- end }}{{ if .IsStruct }}{{ range .Fields }}{{ if .DefaultValue }}
     c.{{ $optionName }}.{{ .Name }} = {{ .DefaultValue }}
 {{- end }}{{ end }}
 {{- end }}{{ end }}
+    return c
+}
+
+{{ if $.createDefaultFunc }}
+func NewDefault{{ $.configTypeName | ToPublic}}() *{{ $.configTypeName }} {
+    return {{ $defaultFuncName }}()
+}
+{{ end }}
+
+func {{ $applyFuncName }}(c *{{ $.configTypeName }}, options ...{{ $.optionTypeName }}) error {
     for _, o := range options {
         if err := o.apply(c); err != nil {
             return err
